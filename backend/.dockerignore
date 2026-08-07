@@ -1,0 +1,8 @@
+node_modules
+dist
+coverage
+storage
+.git
+*.log
+.env
+.env.development

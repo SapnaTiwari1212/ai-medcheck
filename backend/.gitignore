@@ -1,0 +1,42 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+build/
+
+# Prisma
+prisma/migrations/dev.db
+*.db
+*.db-journal
+
+# Environment
+.env
+.env.local
+.env.production
+!.env.example
+!.env.development
+
+# Uploads / storage
+storage/
+uploads/
+
+# Tests
+coverage/
+.tmp/
+
+# Logs
+*.log
+logs/
+npm-debug.log*
+yarn-error.log*
+
+# Editor / OS
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+Thumbs.db
+
+# TypeScript build info
+*.tsbuildinfo

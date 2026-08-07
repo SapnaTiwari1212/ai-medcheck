@@ -1,0 +1,141 @@
+// AI MedCheck — Prisma schema
+// Educational medical report analysis platform.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+  PREFER_NOT_TO_SAY
+}
+
+enum TokenType {
+  EMAIL_VERIFICATION
+  PASSWORD_RESET
+  REFRESH
+}
+
+enum ReportStatus {
+  UPLOADED
+  OCR_PENDING
+  OCR_COMPLETED
+  ANALYSIS_PENDING
+  COMPLETED
+  FAILED
+}
+
+enum StorageProvider {
+  LOCAL
+  S3
+  CLOUDINARY
+}
+
+enum OcrSource {
+  PDF_TEXT
+  OCR
+  IMAGE
+}
+
+enum RiskLevel {
+  LOW
+  MODERATE
+  HIGH
+}
+
+model User {
+  id                 String    @id @default(cuid())
+  email              String    @unique
+  passwordHash       String
+  fullName           String
+  phoneNumber        String?
+  gender             Gender?
+  dateOfBirth        DateTime?
+  preferredLanguage  String    @default("en")
+  profilePictureUrl  String?
+  emailVerifiedAt    DateTime?
+  role               Role      @default(USER)
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+  deletedAt          DateTime?
+
+  tokens  Token[]
+  reports Report[]
+
+  @@index([email])
+}
+
+model Token {
+  id        String    @id @default(cuid())
+  userId    String
+  type      TokenType
+  tokenHash String
+  expiresAt DateTime
+  usedAt    DateTime?
+  revokedAt DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, type])
+  @@index([tokenHash])
+}
+
+model Report {
+  id             String          @id @default(cuid())
+  userId         String
+  originalName   String
+  storageKey     String
+  mimeType       String
+  fileSize       Int
+  storageProvider StorageProvider @default(LOCAL)
+  status         ReportStatus    @default(UPLOADED)
+  ocrText        String?
+  ocrSource      OcrSource?
+  pageCount      Int?
+  errorMessage   String?
+  ocrStartedAt   DateTime?
+  ocrCompletedAt DateTime?
+  analysisStartedAt DateTime?
+  analyzedAt     DateTime?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  deletedAt      DateTime?
+
+  user     User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  analysis AnalysisResult?
+
+  @@index([userId, status])
+  @@index([userId, createdAt])
+}
+
+model AnalysisResult {
+  id                String     @id @default(cuid())
+  reportId          String     @unique
+  overallSummary    String
+  healthScore       Int
+  riskLevel         RiskLevel
+  disclaimer        String
+  rawJson           Json
+  aiModel           String?
+  promptTokens      Int?
+  completionTokens  Int?
+  durationMs        Int?
+  createdAt         DateTime   @default(now())
+
+  report Report @relation(fields: [reportId], references: [id], onDelete: Cascade)
+
+  @@index([reportId])
+}
