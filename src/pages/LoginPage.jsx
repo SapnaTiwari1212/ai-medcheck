@@ -1,12 +1,59 @@
-import { Routes, Route, Link } from 'react-router-dom'
-import { Activity, ArrowRight, ShieldCheck, Sparkles } from 'lucide-react'
-import Navbar from '../components/layout/Navbar.jsx'
-import Footer from '../components/layout/Footer.jsx'
+import { useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import {
+  Activity,
+  AlertCircle,
+  ArrowRight,
+  Loader2,
+  LogIn,
+  ShieldCheck,
+  Sparkles,
+} from 'lucide-react'
+import { useAuth } from '../context/AuthContext.jsx'
 
 const inputCls =
   'w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-800 placeholder-slate-400 outline-none transition-all focus:border-brand-400 focus:ring-4 focus:ring-brand-500/10 dark:border-white/10 dark:bg-white/5 dark:text-slate-100 dark:placeholder-slate-500'
 
+const errorInputCls = 'border-red-400 focus:border-red-400 focus:ring-red-500/10 dark:border-red-500/60'
+
 export default function LoginPage() {
+  const navigate = useNavigate()
+  const { login } = useAuth()
+  const [form, setForm] = useState({ email: '', password: '' })
+  const [errors, setErrors] = useState({})
+  const [serverError, setServerError] = useState('')
+  const [loading, setLoading] = useState(false)
+
+  const set = (key) => (e) => {
+    setForm((f) => ({ ...f, [key]: e.target.value }))
+    setErrors((prev) => (prev[key] ? { ...prev, [key]: undefined } : prev))
+    setServerError('')
+  }
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    const newErrors = {}
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) {
+      newErrors.email = 'Please provide a valid email address'
+    }
+    if (!form.password) {
+      newErrors.password = 'Password is required'
+    }
+    setErrors(newErrors)
+    if (Object.keys(newErrors).length > 0) return
+
+    setLoading(true)
+    setServerError('')
+    try {
+      await login(form.email.trim(), form.password)
+      navigate('/')
+    } catch (err) {
+      setServerError(err.message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
   return (
     <div className="relative min-h-screen pb-24 pt-28">
       <div
@@ -26,12 +73,12 @@ export default function LoginPage() {
             Welcome to AI <span className="text-gradient">MedCheck</span>
           </h1>
           <p className="mt-4 text-lg leading-relaxed text-slate-600 dark:text-slate-400">
-            The analyzer is free and requires no account — just open it and upload a report.
+            Sign in to manage your reports and analysis history.
           </p>
           <ul className="mt-6 space-y-3 text-sm text-slate-600 dark:text-slate-400">
             {[
-              'No signup needed to analyze reports',
-              'Private, in-browser processing',
+              'Track your uploaded reports',
+              'View past analysis results',
               'Educational insights, not diagnoses',
             ].map((t) => (
               <li key={t} className="flex items-center gap-2.5">
@@ -54,30 +101,63 @@ export default function LoginPage() {
             Sign in to your account
           </h2>
           <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-            Early access — account features are coming soon.
+            Enter your credentials to continue.
           </p>
-          <form className="mt-6 space-y-4" onSubmit={(e) => e.preventDefault()}>
+
+          {serverError && (
+            <div className="mt-4 flex items-start gap-2.5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-300">
+              <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+              <span>{serverError}</span>
+            </div>
+          )}
+
+          <form className="mt-6 space-y-4" onSubmit={handleSubmit} noValidate>
             <div>
               <label className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">
                 Email
               </label>
-              <input type="email" placeholder="you@example.com" className={inputCls} />
+              <input
+                type="email"
+                placeholder="you@example.com"
+                value={form.email}
+                onChange={set('email')}
+                className={`${inputCls} ${errors.email ? errorInputCls : ''}`}
+              />
+              {errors.email && <p className="mt-1.5 text-xs text-red-500">{errors.email}</p>}
             </div>
             <div>
               <label className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">
                 Password
               </label>
-              <input type="password" placeholder="••••••••" className={inputCls} />
+              <input
+                type="password"
+                placeholder="••••••••"
+                value={form.password}
+                onChange={set('password')}
+                className={`${inputCls} ${errors.password ? errorInputCls : ''}`}
+              />
+              {errors.password && <p className="mt-1.5 text-xs text-red-500">{errors.password}</p>}
             </div>
             <button
               type="submit"
-              className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-brand-600 to-accent-500 px-6 py-3.5 text-sm font-semibold text-white shadow-lg shadow-brand-500/30 transition-all hover:-translate-y-0.5"
+              disabled={loading}
+              className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-brand-600 to-accent-500 px-6 py-3.5 text-sm font-semibold text-white shadow-lg shadow-brand-500/30 transition-all hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-70"
             >
-              Sign in
+              {loading ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Signing in…
+                </>
+              ) : (
+                <>
+                  <LogIn className="h-4 w-4" />
+                  Sign in
+                </>
+              )}
             </button>
             <p className="flex items-center justify-center gap-1.5 pt-1 text-xs text-slate-400">
               <ShieldCheck className="h-3.5 w-3.5 text-accent-500" />
-              Demo build — authentication is not yet active
+              Your credentials are encrypted and secure
             </p>
           </form>
 

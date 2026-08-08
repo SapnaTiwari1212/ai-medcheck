@@ -27,3 +27,26 @@ export async function apiPost(path, body) {
 
   return payload?.data
 }
+
+export async function apiGet(path) {
+  let res
+  try {
+    res = await fetch(path, {
+      method: 'GET',
+      credentials: 'include',
+    })
+  } catch {
+    throw new Error('Could not reach the server.')
+  }
+
+  if (!res.ok) throw new Error('Not authenticated')
+
+  let payload = null
+  try {
+    payload = await res.json()
+  } catch {
+    /* non-JSON */
+  }
+
+  return payload?.data
+}

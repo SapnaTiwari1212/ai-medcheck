@@ -73,7 +73,7 @@ export class AuthService {
     const passwordValid = await bcrypt.compare(dto.password, user.passwordHash);
     if (!passwordValid) throw new UnauthorizedException('Invalid email or password');
 
-    if (!user.emailVerifiedAt) {
+    if (!user.emailVerifiedAt && this.config.get<string>('env') !== 'development') {
       throw new ForbiddenException('Email not verified. Please check your inbox to verify your account.');
     }
 
