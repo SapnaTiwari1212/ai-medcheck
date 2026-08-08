@@ -4,8 +4,8 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { existsSync } from 'node:fs'
 import mongoose from 'mongoose'
-import { authRouter } from './auth.js'
-import { initStore } from './store.js'
+import { authRouter, authUserFromRequest, publicUser } from './auth.js'
+import { findById, initStore } from './store.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const PORT = Number(process.env.PORT) || 4000
@@ -30,6 +30,18 @@ app.get('/api/health', (_req, res) => {
 })
 
 app.use('/api/auth', authRouter)
+
+app.get('/api/users/me', async (req, res, next) => {
+  try {
+    const payload = authUserFromRequest(req)
+    if (!payload) return res.status(401).json({ message: 'Authentication required.' })
+    const user = await findById(payload.sub)
+    if (!user) return res.status(401).json({ message: 'Account no longer exists.' })
+    return res.json({ data: publicUser(user) })
+  } catch (err) {
+    return next(err)
+  }
+})
 
 if (existsSync(DIST_DIR)) {
   app.use(express.static(DIST_DIR))

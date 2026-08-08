@@ -10,13 +10,24 @@ function signToken(user) {
   return jwt.sign({ sub: user.id, email: user.email }, JWT_SECRET, { expiresIn: TOKEN_TTL })
 }
 
-function publicUser(user) {
+export function publicUser(user) {
   return {
     id: user.id,
     fullName: user.fullName,
     email: user.email,
     preferredLanguage: user.preferredLanguage,
     createdAt: user.createdAt instanceof Date ? user.createdAt.toISOString() : user.createdAt,
+  }
+}
+
+export function authUserFromRequest(req) {
+  const header = req.headers.authorization || ''
+  const token = header.startsWith('Bearer ') ? header.slice(7) : null
+  if (!token) return null
+  try {
+    return jwt.verify(token, JWT_SECRET)
+  } catch {
+    return null
   }
 }
 
@@ -91,16 +102,8 @@ authRouter.post('/login', async (req, res, next) => {
 
 authRouter.post('/me', async (req, res, next) => {
   try {
-    const header = req.headers.authorization || ''
-    const token = header.startsWith('Bearer ') ? header.slice(7) : null
-    if (!token) return res.status(401).json({ message: 'Authentication required.' })
-
-    let payload
-    try {
-      payload = jwt.verify(token, JWT_SECRET)
-    } catch {
-      return res.status(401).json({ message: 'Invalid or expired session.' })
-    }
+    const payload = authUserFromRequest(req)
+    if (!payload) return res.status(401).json({ message: 'Authentication required.' })
 
     const user = await findById(payload.sub)
     if (!user) return res.status(401).json({ message: 'Account no longer exists.' })
@@ -109,4 +112,8 @@ authRouter.post('/me', async (req, res, next) => {
   } catch (err) {
     return next(err)
   }
+})
+
+authRouter.post('/logout', (_req, res) => {
+  res.json({ data: { success: true } })
 })

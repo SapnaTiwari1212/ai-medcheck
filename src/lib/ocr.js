@@ -55,7 +55,10 @@ async function extractPdfText(file, onProgress) {
   const pdfjs = await getPdfjs()
   onProgress?.('Reading PDF document…')
   const data = await file.arrayBuffer()
-  const pdf = await pdfjs.getDocument({ data }).promise
+  const pdf = await pdfjs.getDocument({
+    data,
+    standardFontDataUrl: '/standard_fonts/',
+  }).promise
 
   const pageCount = Math.min(pdf.numPages, MAX_PAGES)
   const pageTexts = []

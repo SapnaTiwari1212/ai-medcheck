@@ -23,6 +23,7 @@
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "react-router-dom": "^7.18.2",
+    "redis": "^6.2.0",
     "tesseract.js": "^7.0.0"
   },
   "devDependencies": {

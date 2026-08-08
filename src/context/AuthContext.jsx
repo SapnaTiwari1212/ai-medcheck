@@ -3,6 +3,8 @@ import { apiPost, apiGet } from '../lib/api.js'
 
 const AuthContext = createContext(null)
 
+const TOKEN_KEY = 'medcheck_token'
+
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -16,18 +18,25 @@ export function AuthProvider({ children }) {
 
   const login = useCallback(async (email, password) => {
     const data = await apiPost('/api/auth/login', { email, password })
+    if (data?.token) localStorage.setItem(TOKEN_KEY, data.token)
     setUser(data?.user ?? null)
     return data
   }, [])
 
   const register = useCallback(async (body) => {
     const data = await apiPost('/api/auth/register', body)
+    if (data?.token) localStorage.setItem(TOKEN_KEY, data.token)
     setUser(data?.user ?? null)
     return data
   }, [])
 
   const logout = useCallback(async () => {
-    await apiPost('/api/auth/logout', {})
+    localStorage.removeItem(TOKEN_KEY)
+    try {
+      await apiPost('/api/auth/logout', {})
+    } catch {
+      /* session already expired */
+    }
     setUser(null)
   }, [])
 

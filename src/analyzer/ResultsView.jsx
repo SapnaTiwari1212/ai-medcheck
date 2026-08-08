@@ -21,13 +21,13 @@ import {
 import { buildSummaryText } from '../lib/utils.js'
 import { Link } from 'react-router-dom'
 
-function Stat({ icon, label, value, tone }) {
+function Stat({ icon: Icon, label, value, tone }) {
   return (
     <div className="glass flex items-center gap-3 rounded-2xl px-4 py-3.5">
       <span
         className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${tone}`}
       >
-        <icon.icon className="h-5 w-5" />
+        <Icon className="h-5 w-5" />
       </span>
       <div>
         <p className="text-2xl font-extrabold leading-none text-slate-900 dark:text-white">
