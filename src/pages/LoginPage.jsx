@@ -80,6 +80,16 @@ export default function LoginPage() {
               Demo build — authentication is not yet active
             </p>
           </form>
+
+          <p className="mt-6 text-center text-sm text-slate-500 dark:text-slate-400">
+            Don&apos;t have an account?{' '}
+            <Link
+              to="/register"
+              className="font-semibold text-brand-600 hover:text-brand-700 dark:text-brand-300 dark:hover:text-brand-200"
+            >
+              Sign up
+            </Link>
+          </p>
         </div>
       </div>
     </div>

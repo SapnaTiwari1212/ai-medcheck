@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Activity, Menu, X, Moon, Sun, LogIn, ArrowRight } from 'lucide-react'
+import { Activity, Menu, X, Moon, Sun, LogIn, UserPlus, ArrowRight } from 'lucide-react'
 import { useTheme } from '../../context/ThemeContext.jsx'
 
 const links = [
@@ -88,6 +88,13 @@ export default function Navbar() {
             Login
           </Link>
           <Link
+            to="/register"
+            className="inline-flex items-center gap-2 rounded-full border border-slate-200 px-5 py-2.5 text-sm font-semibold text-slate-700 transition-colors hover:border-brand-300 hover:text-brand-700 dark:border-white/15 dark:text-slate-200 dark:hover:border-brand-400/60 dark:hover:text-brand-300"
+          >
+            <UserPlus className="h-4 w-4" />
+            Sign up
+          </Link>
+          <Link
             to="/analyze"
             className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-brand-600 to-accent-500 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-brand-500/30 transition-all hover:-translate-y-0.5 hover:shadow-xl hover:shadow-brand-500/40"
           >
@@ -140,6 +147,12 @@ export default function Navbar() {
                   className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700 dark:border-white/10 dark:text-slate-200"
                 >
                   <LogIn className="h-4 w-4" /> Login
+                </Link>
+                <Link
+                  to="/register"
+                  className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700 dark:border-white/10 dark:text-slate-200"
+                >
+                  <UserPlus className="h-4 w-4" /> Sign up
                 </Link>
                 <Link
                   to="/analyze"

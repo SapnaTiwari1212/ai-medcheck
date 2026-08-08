@@ -1,9 +1,8 @@
-import { Controller, Get, Res } from '@nestjs/common';
+import { Controller, Get, Res, ServiceUnavailableException } from '@nestjs/common';
 import {
   HealthCheck,
   HealthCheckService,
   HealthIndicatorService,
-  ServiceUnavailableException,
 } from '@nestjs/terminus';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Response } from 'express';
